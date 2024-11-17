@@ -44,6 +44,7 @@ jobs:
               run: |
                   pip install maturin 
                   pip install numpy
+                  cp README.md LICENSE.txt box-intersect-lib-py 
             - name: Build python bindings into wheel
               run: |
                   (cd box-intersect-lib-py && maturin build --release --strip)
