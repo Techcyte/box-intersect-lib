@@ -1,0 +1,19 @@
+FROM public.ecr.aws/docker/library/rust:buster
+
+RUN cargo search --limit 1
+RUN rustup component add clippy
+
+RUN curl https://bootstrap.pypa.io/pip/3.7/get-pip.py | python3
+# RUN python3 get-pip.py
+RUN pip3 install maturin numpy
+
+COPY ./box-intersect-lib /box-intersect-lib
+COPY ./box-intersect-lib-py /box-intersect-lib-py
+# effectively tests the build process
+RUN (cd box-intersect-lib && cargo build)
+RUN (cd box-intersect-lib-py && maturin build)
+# install python build for simple python integration testing
+RUN pip3 install /box-intersect-lib-py/target/wheels/box_intersect_lib_py-*.whl
+
+COPY ./scripts/ ./scripts/
+COPY ./benchmark/ ./benchmark/

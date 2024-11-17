@@ -1,0 +1,28 @@
+ARG ARCH=x86_64
+FROM quay.io/pypa/manylinux2014_${ARCH}
+
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+ENV PATH="/root/.cargo/bin:$PATH"
+# force cargo to update index
+RUN cargo search --limit 1
+
+RUN /opt/python/cp312-cp312/bin/pip install maturin
+RUN /opt/python/cp311-cp311/bin/pip install maturin
+RUN /opt/python/cp310-cp310/bin/pip install maturin
+RUN /opt/python/cp39-cp39/bin/pip install maturin
+RUN /opt/python/cp38-cp38/bin/pip install maturin
+RUN /opt/python/cp37-cp37m/bin/pip install maturin
+
+# lets take 3.10 to be the one to do the final upload
+RUN /opt/python/cp310-cp310/bin/pip install twine
+
+RUN mkdir /work
+
+WORKDIR /work
+COPY ./box-intersect-lib ./box-intersect-lib
+COPY ./box-intersect-lib-py ./box-intersect-lib-py
+
+WORKDIR /work/box-intersect-lib-py
+
+COPY scripts/build.sh build.sh
+COPY scripts/build_and_upload.sh build_and_upload.sh
