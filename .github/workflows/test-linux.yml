@@ -1,0 +1,56 @@
+---
+name: Python tests
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+
+permissions:
+    contents: read
+
+jobs:
+    lint-rust:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                python-version: ['3.10']
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions-rust-lang/setup-rust-toolchain@v1
+            - name: Lint Rust library
+              run: | 
+                  bash scripts/lint.sh
+
+    unit-test-rust: 
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions-rust-lang/setup-rust-toolchain@v1
+            - name: Install dependencies
+              run: |
+                bash scripts/unit-test.sh
+
+    test-python-bindings: 
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                python-version: ['3.10']
+                #['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
+        steps:
+            - uses: actions/checkout@v4
+            - name: Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v4
+              with:
+                  python-version: ${{ matrix.python-version }}
+            - name: Install dependencies
+              run: |
+                  pip install maturin
+            - name: Build python bindings into wheel
+              run: |
+                  (cd box-intersect-lib-py && maturin build --release --strip)
+                  pip install box-intersect-lib-py/target/wheels/*
+            - name: Run integration test
+              run: |
+                  python scripts/integration_test.py
