@@ -45,7 +45,7 @@ jobs:
           pip install numpy
     - name: Build wheels
       run: |
-          cp README.md NOTICE.txt box-intersect-lib-py 
+          cp README.md LICENSE.txt box-intersect-lib-py 
           (cd box-intersect-lib-py && bash scripts/build.sh)
     - name: Store wheels
       uses: actions/upload-artifact@v4
