@@ -32,8 +32,8 @@ where
             ));
         }
         func(Box {
-            x1: x1,
-            y1: y1,
+            x1,
+            y1,
             xs: width as u32,
             ys: height as u32,
         });
@@ -49,7 +49,7 @@ fn np_arr_to_boxes(array: &PyReadonlyArray2<i32>) -> PyResult<Vec<Box>> {
     Ok(boxes)
 }
 
-fn np_arr_to_box<'a>(array: &'a PyReadonlyArray1<i32>) -> PyResult<Box> {
+fn np_arr_to_box(array: &PyReadonlyArray1<i32>) -> PyResult<Box> {
     let dims = array.dims();
     let len = dims[0];
     if len != 4 {
@@ -72,10 +72,7 @@ fn np_arr_to_box<'a>(array: &'a PyReadonlyArray1<i32>) -> PyResult<Box> {
     Ok(box_)
 }
 
-fn adj_list_to_py_list<'py>(
-    py: Python<'py>,
-    adj_list: Vec<Vec<u32>>,
-) -> PyResult<Bound<'py, PyList>> {
+fn adj_list_to_py_list(py: Python<'_>, adj_list: Vec<Vec<u32>>) -> PyResult<Bound<'_, PyList>> {
     Ok(PyList::new_bound(
         py,
         adj_list
@@ -218,7 +215,7 @@ fn efficient_coverage<'py>(
         .allow_threads(move || {
             box_intersect_lib::efficient_coverage(&boxes, tile_width, tile_height)
         })
-        .map_err(|err| PyAssertionError::new_err(err))?;
+        .map_err(PyAssertionError::new_err)?;
     let py_results = results
         .iter()
         .map(|(p, intlist)| ((p.x, p.y), PyArray::from_vec_bound(py, intlist.to_owned())))
@@ -251,8 +248,8 @@ impl BoxIntersector {
             py,
             py.allow_threads(move || {
                 self.inner.find_intersections(&Box {
-                    x1: x1,
-                    y1: y1,
+                    x1,
+                    y1,
                     xs: width,
                     ys: height,
                 })
