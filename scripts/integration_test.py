@@ -39,3 +39,5 @@ results = box_intersect_lib_py.efficient_coverage(boxes, 10, 10)
 assert len(results) == 1
 assert results[0][0] == (0,-1)
 assert np.equal(np.sort(results[0][1]), np.array([0, 1, 2], dtype=np.uint32)).all()
+
+print("Integration test: All asserts passed!")
