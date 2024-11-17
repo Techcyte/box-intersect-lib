@@ -43,7 +43,8 @@ jobs:
                   python-version: ${{ matrix.python-version }}
             - name: Install dependencies
               run: |
-                  pip install maturin
+                  pip install maturin 
+                  pip install numpy
             - name: Build python bindings into wheel
               run: |
                   (cd box-intersect-lib-py && maturin build --release --strip)
