@@ -24,13 +24,16 @@ jobs:
     - name: Store wheels
       uses: actions/upload-artifact@v4
       with:
+        name: dist-manylinux
         path: dist
 
   build-macos-wheels:
     runs-on: macos-latest
     strategy:
+      fail-fast: false
       matrix:
-          python-version: ['3.8', '3.9', '3.10', '3.11', '3.12',]
+          python-version: ['3.10', '3.11',]
+          #['3.8', '3.9', '3.10', '3.11', '3.12',]
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
@@ -46,11 +49,12 @@ jobs:
       run: |
           cp README.md LICENSE.txt box-intersect-lib-py 
           (cd box-intersect-lib-py && bash ../scripts/build.sh)
-          cp -r box-intersect-lib-py/target/wheels dist-macos-${{ matrix.python-version }}
+          cp -r box-intersect-lib-py/target/wheels dist
     - name: Store wheels
       uses: actions/upload-artifact@v4
       with:
-        path: dist-macos-${{ matrix.python-version }}
+        name: dist-macos-${{ matrix.python-version }}
+        path: dist
 
   publish:
     runs-on: ubuntu-latest
@@ -67,7 +71,8 @@ jobs:
     - name: Download dists
       uses: actions/download-artifact@v4
       with:
-        name: artifact
+        pattern: dist-*
+        merge-multiple: true
         path: dist
     - name: Publish
       uses: pypa/gh-action-pypi-publish@release/v1
