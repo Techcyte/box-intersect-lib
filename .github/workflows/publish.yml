@@ -21,7 +21,7 @@ jobs:
     - name: Build manylinux container
       run: docker build -f Dockerfile.build-manylinux . -t box-intersect-deploy
     - name: Load wheels
-      run: docker cp $(docker create --name tc Dockerfile.build-manylinux):/work/box-intersect-lib-py/target/wheels ./dist
+      run: docker cp $(docker create --name tc box-intersect-deploy):/work/box-intersect-lib-py/target/wheels ./dist
     - name: Store wheels
       uses: actions/upload-artifact@v4
       with:
