@@ -37,6 +37,8 @@ If pip install fails, due to prebuilt binary wheels not being avaliable on your 
 3. Build wheel with `(cd box-intersect-lib-py && maturin build --release --strip)`
 4. Previous step will put wheel in a local directory. IT should be install able with `pip install box-intersect-lib-py/target/wheels/*`
 
+A dockerfile with all of this set containerized is provided in `Dockerfile.text`
+
 ### Usage:
 
 ```python
