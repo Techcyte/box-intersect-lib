@@ -10,7 +10,7 @@ checksum = "0c4b4d0bd25bd0b74681c0ad21497610ce1b7c91b1022cd21c80c6fbdd9476b0"
 
 [[package]]
 name = "box-intersect-lib"
-version = "0.8.1"
+version = "0.8.2"
 dependencies = [
  "rand",
  "rand_chacha",

@@ -19,6 +19,7 @@ WORKDIR /work
 COPY ./box-intersect-lib ./box-intersect-lib
 COPY ./box-intersect-lib-py ./box-intersect-lib-py
 COPY ./scripts ./scripts
+COPY ./README.md ./box-intersect-lib-py/README.md
 
 WORKDIR /work/box-intersect-lib-py
 
