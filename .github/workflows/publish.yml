@@ -30,6 +30,23 @@ jobs:
       with:
         path: dist
 
+  build-aarch64-wheels:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Build manylinux container
+      run: docker build -f Dockerfile.build-manylinux . -t box-intersect-deploy
+    - name: Load wheels
+      run: docker cp $(docker create --name tc box-intersect-deploy):/work/box-intersect-lib-py/target/wheels ./dist
+    - name: Store wheels
+      uses: actions/upload-artifact@v4
+      with:
+        path: dist-aarch64
+
   publish:
     runs-on: ubuntu-latest
     needs:
