@@ -22,7 +22,7 @@ pub fn find_best_matches(
             if u_area > 0. && u_area * iou_threshold <= i_area {
                 let iou = i_area / u_area;
                 intersections.push(Intersection {
-                    iou: iou,
+                    iou,
                     idx1: *r1idx,
                     idx2: r2idx as u32,
                 });

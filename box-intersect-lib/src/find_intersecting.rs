@@ -50,8 +50,8 @@ pub fn find_intersecting_boxes_linesearch(raw_boxes: &[Box]) -> Vec<Vec<u32>> {
     // mirror over all directed connections so that boxes intersect with those to the right of themselves
     for (l, (_, bidx)) in nodes_to_left.iter().zip(sorted_boxes.iter()) {
         for i in l.iter() {
-            graph[*i as usize].push(*bidx as u32);
-            graph[*bidx as usize].push(*i as u32);
+            graph[*i as usize].push(*bidx);
+            graph[*bidx as usize].push(*i);
         }
     }
     graph

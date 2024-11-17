@@ -83,7 +83,7 @@ impl RTSNode {
         let (parent_left, parent_right) =
             boxes
                 .iter()
-                .fold((std::i32::MAX, std::i32::MIN), |(left, right), (b, _)| {
+                .fold((i32::MAX, i32::MIN), |(left, right), (b, _)| {
                     (
                         min(Axis::Transpose::left(b), left),
                         max(Axis::Transpose::right(b), right),
