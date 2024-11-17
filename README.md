@@ -1,6 +1,7 @@
 # Fast box intersection algorithm
 
-![Integration test badge](https://github.com/Techcyte/box-intersect-lib/actions/workflows/publish.yml/badge.svg)
+![Linux test badge](https://github.com/Techcyte/box-intersect-lib/actions/workflows/test-linux.yml/badge.svg)
+![Build publish badge](https://github.com/Techcyte/box-intersect-lib/actions/workflows/publish.yml/badge.svg)
 
 Computes box intersection/overlap/density algorithms using efficient algorithms and data structures. Aspires offer a easy-to-use interface that "just works" on both smaller and larger datasets. Written in Rust with Python bindings.
 
