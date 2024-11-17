@@ -79,6 +79,7 @@ mod tests {
         non_suppressed
     }
 
+    #[allow(dead_code)]
     fn generate_boxes(region_size: i32, num_boxes: i32, max_box_size: i32) -> Vec<Box> {
         let mut rng = rand::thread_rng();
         let sampler = Normal::new(0.0, region_size as f64 / 3.0).unwrap();
