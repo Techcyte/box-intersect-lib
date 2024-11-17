@@ -7,9 +7,8 @@
 name: build-publish
 
 on:
-  release:
-    types: [published]
-
+    push:
+        branches: [main]
 jobs:
   build-manylinux-wheels:
     runs-on: ubuntu-latest
