@@ -5,6 +5,11 @@ use pyo3::exceptions::PyAssertionError;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
 
+
+type BoundU32Array2<'py> = pyo3::Bound<'py, PyArray2<u32>>;
+type BoundU32Array1<'py> = pyo3::Bound<'py, PyArray1<u32>>;
+
+
 fn generate_boxes<Func>(array: &PyReadonlyArray2<i32>, func: &mut Func) -> PyResult<()>
 where
     Func: FnMut(Box),
@@ -131,9 +136,9 @@ fn find_best_matches<'py>(
     boxes_array_2: PyReadonlyArray2<i32>,
     iou_threshold: f64,
 ) -> PyResult<(
-    pyo3::Bound<'py, PyArray2<u32>>,
-    pyo3::Bound<'py, PyArray1<u32>>,
-    pyo3::Bound<'py, PyArray1<u32>>,
+    BoundU32Array2<'py>,
+    BoundU32Array1<'py>,
+    BoundU32Array1<'py>,
 )> {
     let boxes_vec_1 = np_arr_to_boxes(&boxes_array_1)?;
     let boxes_vec_2 = np_arr_to_boxes(&boxes_array_2)?;
@@ -209,7 +214,7 @@ fn efficient_coverage<'py>(
     boxes_array: PyReadonlyArray2<i32>,
     tile_width: u32,
     tile_height: u32,
-) -> PyResult<Vec<((i32, i32), pyo3::Bound<'py, PyArray1<u32>>)>> {
+) -> PyResult<Vec<((i32, i32), BoundU32Array1<'py>)>> {
     let boxes = np_arr_to_boxes(&boxes_array)?;
     let results = py
         .allow_threads(move || {
