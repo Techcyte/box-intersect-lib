@@ -17,10 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
     - name: Build manylinux container
       run: docker build -f Dockerfile.build-manylinux . -t box-intersect-deploy
     - name: Load wheels
@@ -32,12 +28,15 @@ jobs:
 
   build-macos-wheels:
     runs-on: macos-latest
+    strategy:
+      matrix:
+          python-version: ['3.8', '3.9', '3.10', '3.11', '3.12',]
     steps:
     - uses: actions/checkout@v3
-    - name: Set up Python
-      uses: actions/setup-python@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.x'
+          python-version: ${{ matrix.python-version }}
     - uses: actions-rust-lang/setup-rust-toolchain@v1
     - name: Install dependencies
       run: |
@@ -47,10 +46,11 @@ jobs:
       run: |
           cp README.md LICENSE.txt box-intersect-lib-py 
           (cd box-intersect-lib-py && bash ../scripts/build.sh)
+          cp -r box-intersect-lib-py/target/wheels dist-macos
     - name: Store wheels
       uses: actions/upload-artifact@v4
       with:
-        path: dist-macos
+        path: dist-macos_${{ matrix.python-version }}
 
   publish:
     runs-on: ubuntu-latest
