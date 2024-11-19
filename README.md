@@ -179,14 +179,9 @@ Note that the implementation is no longer part of the master branch, as it was s
 
 ### Efficient coverage heuristic
 
-The efficient coverage heuristic algorithm is similar in concept to the left-to-right search algorithm idea.
+The idea is to find a set of fixed-sized tiles, which each box in the set is completely covered by at least one tile. This can be used as a tool whenever there is a need to process all the boxes in batches of fixed sized tiles, including for neural network processing or some other sort of image or box processing that benefits somehow from evenly sized batches of work. It is an error if there is any box bigger than the tile size. There is no limit to how much the tiles can overlap.
 
-The constraint to the solution set is that all boxes must be covered with a tile. This implies that the left-most box also must be covered with a tile. And this tile can be placed at the left-most edge of the box.
-
-
-If all possible tiles with this constraint are enumerated, we construct a vertically oriented window of possible tiles. Any individual box fully contained within this window can be added, but if so, the constraints on the tile set will increase, and so the window may shrink as it is contrained to include both boxes.
-
-Computing the optimal box to add requires global analysis and is potentially extremely expensive. So we can utilize a simple but suprisingly effective heuristic: find the next left-most box fully contained in the window, and just add it, and shrink the window. A visualization of this heuristic is shown below:
+Computing the globally minimal set of tiles is hard in general, so an approximation is used. The heuristic algorithm is similar in concept to the left-to-right search algorithm idea. A visualization of the algorithm in action is shown below.
 
 ![algorithm-reveal-1](./docs/rect_cover_norm.gif)
 
@@ -201,14 +196,15 @@ This approximate algorithm has an informal beginnings of a worst case analysis t
 5. The resulting set of boxes from step 3 is strictly a subset of step 2. Since the optimal solution cannot increase by removing boxes, you can apply this analysis recursively on the remaining set of boxes.
 6. Since step 3 only required at worst twice as many tiles as step 2, this algorithm is a 2-approximation.
 
-Not a super formal argument. But I can't come up with any worst case solution worst than a 2-approximation, let us know if you find a counter-example. And a synthetic benchmark labeled it as the best solution yet.
+A lower bound of the 2 approximation is shown below:
 
-The worst case I could construct is this:
+<img src="./docs/left_to_left_greedy_worst_case.png" alt="left_to_left_greedy_worst_case" width="150px"/>
 
-![ar](/images/rect_cover/left_to_left_greedy_worst_case.png)
 
 This particular case produces 6 tiles, where the optimal solution produces 4. However, in the infinite limit, extended downwards, this produces twice as many tiles as the best case. Suggesting that the 2-approximation is tight.
 
-The implementation of this algorithm is one of the fastest of all the algorithms in the repo, due to it not using the R-Tree structure at all. Since both phases of the algorithm are left-to-right sweeps, the implementation instead does a single left-to-right sweep over boxes, and builds up multiple tiles at once. As the global sweep encounters a new left-most box, it either adds a box to an existing tile window, or if that is not possible, creates a new tile window. These windows are added from left-to-right by construction, and so only the first windows need to be checked if they need to be popped off the stack or not when the global sweep passes their left-most edge. All in-progress windows are checked by brute force when a new box is encountered. This yields a `O(num_boxes * num_windows)` algorithm in the worst case where all boxes are vertically stacked on top of each other with lots of spacing in between them in the Y axis, but if boxes spacings are equally distributed between X and Y fields (no matter their density), then it goes to `O(num_boxes * sqrt(num_boxes))` max runtime, as there will only be `sqrt(num_boxes)` number of windows open at any given point in time that need to be checked. This means that a simple optimization to reduce worst-case analysis could be swapping the X and Y if there is a lot of vertical stacking, which should reduce the worst case analysis to the square case of `O(num_boxes * sqrt(num_boxes))`.
+While the upper bound is not a rigourous proof by any means, this left-to-right heuristic also performed better on synthetic benchmarks than other greedy algorithms that were tried, such as the "set-cover" inspired method of choosing the maximally covering single tile iterativly, or a choosing the maximally covering left-most tile iteratively.
+
+As for speed, the implementation of this algorithm is one of the fastest of all the algorithms in the repo, due to it not using the R-Tree structure at all. Since both phases of the algorithm are left-to-right sweeps, the implementation instead does a single left-to-right sweep over boxes, and builds up multiple tiles at once. As the global sweep encounters a new left-most box, it either adds a box to an existing tile window, or if that is not possible, creates a new tile window. These windows are added from left-to-right by construction, and so only the first windows need to be checked if they need to be popped off the stack or not when the global sweep passes their left-most edge. All in-progress windows are checked by brute force when a new box is encountered. This yields a `O(num_boxes * num_windows)` algorithm in the worst case where all boxes are vertically stacked on top of each other with lots of spacing in between them in the Y axis, but if boxes spacings are equally distributed between X and Y fields (no matter their density), then it goes to `O(num_boxes * sqrt(num_boxes))` max runtime, as there will only be `sqrt(num_boxes)` number of windows open at any given point in time that need to be checked. This means that a simple optimization to reduce worst-case analysis could be swapping the X and Y if there is a lot of vertical stacking, which should reduce the worst case analysis to the square case of `O(num_boxes * sqrt(num_boxes))`.
 
 [More writeup on the intuition behind this algorithm here](https://benblack769.github.io/posts/blog/rect_cover/)
