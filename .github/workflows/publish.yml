@@ -50,8 +50,7 @@ jobs:
       shell: bash
       run: |
           ls
-          cp README.md box-intersect-lib-py
-          cp LICENSE.txt box-intersect-lib-py
+          cp README.md LICENSE.txt box-intersect-lib-py
           cd box-intersect-lib-py
           maturin build --release --strip
           cd ..
