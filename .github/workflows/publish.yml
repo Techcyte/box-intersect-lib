@@ -21,6 +21,11 @@ jobs:
       run: docker build -f Dockerfile.build-manylinux . -t box-intersect-deploy
     - name: Load wheels
       run: docker cp $(docker create --name tc box-intersect-deploy):/work/box-intersect-lib-py/target/wheels ./dist
+    - name: Run integration test on native built wheel
+      shell: bash
+      run: |
+          pip install dist/*.whl
+          python scripts/integration_test.py
     - name: Store wheels
       uses: actions/upload-artifact@v4
       with:
