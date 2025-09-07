@@ -100,7 +100,7 @@ impl RTSNode {
             boxes.sort_unstable_by_key(|(b, _)| Axis::left(b));
 
             //divide the tree up in bins of at least GOAL_NODE_SIZE in size
-            let child_sizes = (boxes.len() + GOAL_NODE_SIZE - 1) / GOAL_NODE_SIZE;
+            let child_sizes = boxes.len().div_ceil(GOAL_NODE_SIZE);
             let n_divs = boxes.len() / child_sizes;
 
             let mut children = Vec::<RTSNode>::with_capacity(n_divs);

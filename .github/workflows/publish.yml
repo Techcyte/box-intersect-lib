@@ -34,7 +34,7 @@ jobs:
       matrix:
           # macos-13 is x86, macos-14 is M1 ARM
           os: [windows-latest, macos-13, macos-14]
-          python-version: ['3.8', '3.9', '3.10', '3.11', '3.12',]
+          python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
@@ -50,8 +50,7 @@ jobs:
       shell: bash
       run: |
           ls
-          cp README.md box-intersect-lib-py
-          cp LICENSE.txt box-intersect-lib-py
+          cp README.md LICENSE.txt box-intersect-lib-py
           cd box-intersect-lib-py
           maturin build --release --strip
           cd ..

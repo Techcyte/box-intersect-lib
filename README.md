@@ -37,7 +37,7 @@ If pip install fails, due to prebuilt binary wheels not being avaliable on your 
 1. If you don't have rust installed, install with `curl https://sh.rustup.rs -sSf | sh
 ` [official installation docs](https://doc.rust-lang.org/cargo/getting-started/installation.html)
 2. Install python dependencies: `pip install maturin numpy`
-3. Build wheel with `(cd box-intersect-lib-py && maturin build --release --strip)`
+3. Build wheel with `(cp README.md LICENSE.txt box-intersect-lib-py && cd box-intersect-lib-py && maturin build --release --strip)`
 4. Previous step will put wheel in a local directory. IT should be install able with `pip install box-intersect-lib-py/target/wheels/*`
 
 A dockerfile with all of this set containerized is provided in `Dockerfile.text`

@@ -78,12 +78,15 @@ fn np_arr_to_box(array: &PyReadonlyArray1<i32>) -> PyResult<Box> {
 }
 
 fn adj_list_to_py_list(py: Python<'_>, adj_list: Vec<Vec<u32>>) -> PyResult<Bound<'_, PyList>> {
-    Ok(PyList::new_bound(
+    let mut list:Vec<Bound<'_, PyList>> = Vec::new();
+    for l in adj_list {
+        let pyl = PyList::new(py, l.clone())?;
+        list.push(pyl);
+    }
+    PyList::new(
         py,
-        adj_list
-            .iter()
-            .map(|x| PyArray::from_vec_bound(py, x.clone())),
-    ))
+        list,
+    )
 }
 
 #[pyfunction]
@@ -92,7 +95,7 @@ fn find_intersecting_boxes_rts<'py>(
     boxes_array: PyReadonlyArray2<i32>,
 ) -> PyResult<Bound<'py, PyList>> {
     let boxes = np_arr_to_boxes(&boxes_array)?;
-    let adj_list = py.allow_threads(move || box_intersect_lib::find_intersecting_boxes_rts(&boxes));
+    let adj_list = Python::detach(py, move || box_intersect_lib::find_intersecting_boxes_rts(&boxes));
     adj_list_to_py_list(py, adj_list)
 }
 
@@ -103,7 +106,7 @@ fn find_intersecting_boxes_linesearch<'py>(
 ) -> PyResult<Bound<'py, PyList>> {
     let boxes = np_arr_to_boxes(&boxes_array)?;
     let adj_list =
-        py.allow_threads(move || box_intersect_lib::find_intersecting_boxes_linesearch(&boxes));
+        Python::detach(py, move || box_intersect_lib::find_intersecting_boxes_linesearch(&boxes));
     adj_list_to_py_list(py, adj_list)
 }
 
@@ -123,7 +126,7 @@ fn find_intersecting_boxes_asym<'py>(
 ) -> PyResult<Bound<'py, PyList>> {
     let boxes_vec_src = np_arr_to_boxes(&boxes_array_src)?;
     let boxes_vec_dest = np_arr_to_boxes(&boxes_array_dest)?;
-    let adj_list = py.allow_threads(move || {
+    let adj_list = Python::detach(py, move || {
         box_intersect_lib::find_intersecting_boxes_asym(&boxes_vec_src, &boxes_vec_dest)
     });
     adj_list_to_py_list(py, adj_list)
@@ -142,15 +145,15 @@ fn find_best_matches<'py>(
 )> {
     let boxes_vec_1 = np_arr_to_boxes(&boxes_array_1)?;
     let boxes_vec_2 = np_arr_to_boxes(&boxes_array_2)?;
-    let (matches, rem1, rem2) = py.allow_threads(move || {
+    let (matches, rem1, rem2) = Python::detach(py, move || {
         box_intersect_lib::find_best_matches(&boxes_vec_1, &boxes_vec_2, iou_threshold)
     });
     let flat_matches_vec: Vec<u32> = matches.iter().flat_map(|x| [x.0, x.1]).collect();
-    let np_matches = PyArray::from_vec_bound(py, flat_matches_vec).reshape([matches.len(), 2])?;
+    let np_matches = PyArray::from_vec(py, flat_matches_vec).reshape([matches.len(), 2])?;
     Ok((
         np_matches,
-        PyArray::from_vec_bound(py, rem1),
-        PyArray::from_vec_bound(py, rem2),
+        PyArray::from_vec(py, rem1),
+        PyArray::from_vec(py, rem2),
     ))
 }
 
@@ -165,7 +168,7 @@ fn intersect_area<'py>(
     generate_boxes(&boxes, &mut |b| {
         area_vec.push(box_intersect_lib::intersect_area(&box_, &b));
     })?;
-    Ok(PyArray::from_vec_bound(py, area_vec))
+    Ok(PyArray::from_vec(py, area_vec))
 }
 
 #[pyfunction]
@@ -177,7 +180,7 @@ fn area<'py>(
     generate_boxes(&boxes, &mut |b| {
         area_vec.push(b.area());
     })?;
-    Ok(PyArray::from_vec_bound(py, area_vec))
+    Ok(PyArray::from_vec(py, area_vec))
 }
 
 #[pyfunction]
@@ -197,7 +200,7 @@ fn find_non_max_suppressed<'py>(
             "Length of boxes list must match length of scores list",
         ));
     }
-    let suppressed_mask = py.allow_threads(move || {
+    let suppressed_mask = Python::detach(py, move || {
         box_intersect_lib::find_non_max_suppressed(
             &boxes,
             scores_slice,
@@ -205,7 +208,7 @@ fn find_non_max_suppressed<'py>(
             overlap_threshold,
         )
     });
-    Ok(PyArray::from_vec_bound(py, suppressed_mask))
+    Ok(PyArray::from_vec(py, suppressed_mask))
 }
 
 #[pyfunction]
@@ -216,14 +219,13 @@ fn efficient_coverage<'py>(
     tile_height: u32,
 ) -> PyResult<Vec<((i32, i32), BoundU32Array1<'py>)>> {
     let boxes = np_arr_to_boxes(&boxes_array)?;
-    let results = py
-        .allow_threads(move || {
+    let results = Python::detach(py, move || {
             box_intersect_lib::efficient_coverage(&boxes, tile_width, tile_height)
         })
         .map_err(PyAssertionError::new_err)?;
     let py_results = results
         .iter()
-        .map(|(p, intlist)| ((p.x, p.y), PyArray::from_vec_bound(py, intlist.to_owned())))
+        .map(|(p, intlist)| ((p.x, p.y), PyArray::from_vec(py, intlist.to_owned())))
         .collect();
     Ok(py_results)
 }
@@ -249,9 +251,9 @@ impl BoxIntersector {
         width: u32,
         height: u32,
     ) -> PyResult<pyo3::Bound<'py, PyArray1<u32>>> {
-        Ok(PyArray::from_vec_bound(
+        Ok(PyArray::from_vec(
             py,
-            py.allow_threads(move || {
+            Python::detach(py, move || {
                 self.inner.find_intersections(&Box {
                     x1,
                     y1,
