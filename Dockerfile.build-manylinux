@@ -12,7 +12,6 @@ RUN /opt/python/cp311-cp311/bin/pip install maturin
 RUN /opt/python/cp310-cp310/bin/pip install maturin
 RUN /opt/python/cp39-cp39/bin/pip install maturin
 RUN /opt/python/cp38-cp38/bin/pip install maturin
-RUN /opt/python/cp37-cp37m/bin/pip install maturin
 
 RUN mkdir /work
 
@@ -30,4 +29,3 @@ RUN bash ../scripts/build.sh /opt/python/cp311-cp311/bin/
 RUN bash ../scripts/build.sh /opt/python/cp310-cp310/bin/
 RUN bash ../scripts/build.sh /opt/python/cp39-cp39/bin/
 RUN bash ../scripts/build.sh /opt/python/cp38-cp38/bin/
-RUN bash ../scripts/build.sh /opt/python/cp37-cp37m/bin/

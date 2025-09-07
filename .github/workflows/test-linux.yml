@@ -53,3 +53,23 @@ jobs:
             - name: Run integration test
               run: |
                   python scripts/integration_test.py
+    test-linux-wheels:
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v4 
+        with:
+            python-version: 3.12
+      - name: Install python dependencies
+        run: |
+            pip install numpy
+      - name: Build manylinux container
+        run: docker build -f Dockerfile.build-manylinux . -t box-intersect-deploy
+      - name: Load wheels
+        run: docker cp $(docker create --name tc box-intersect-deploy):/work/box-intersect-lib-py/target/wheels ./dist
+      - name: Run integration test on native built wheel
+        shell: bash
+        run: |
+            pip install dist/*cp312*.whl
+            python scripts/integration_test.py
