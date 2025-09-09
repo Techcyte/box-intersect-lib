@@ -77,10 +77,10 @@ fn np_arr_to_box(array: &PyReadonlyArray1<i32>) -> PyResult<Box> {
     Ok(box_)
 }
 
-fn adj_list_to_py_list(py: Python<'_>, adj_list: Vec<Vec<u32>>) -> PyResult<Bound<'_, PyList>> {
-    let mut list:Vec<Bound<'_, PyList>> = Vec::new();
+fn adj_list_to_py_list(py: Python<'_>, adj_list: Vec<Vec<u32>>) -> PyResult<pyo3::Bound<'_, PyList>> {
+    let mut list:Vec<BoundU32Array1<'_>> = Vec::new();
     for l in adj_list {
-        let pyl = PyList::new(py, l.clone())?;
+        let pyl = PyArray::from_vec(py, l.clone());
         list.push(pyl);
     }
     PyList::new(
