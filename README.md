@@ -18,11 +18,11 @@ The primary data structure is for rectangle set intersection: a class which stru
     * `new(box_list)`: Creates the immutable box intersector with the following list of boxes.
     * `find_intersections(x1, y1, width, height) -> List[int]`: Finds all intersections with rectangle defined by `(x1, y1, width, height)`. Returned list are the indexes in the input box list
 
-The following algorithms are also avaliable:
+The following algorithms are also available:
 
 * `find_intersecting_boxes(box_list)->list[list[int]]`: Returns all-to-all adjacency list of intersecting boxes.
 * `find_intersecting_boxes_asym(source_boxes, dest_boxes)->list[list[int]]`: Returns source-to-dest adjacency list of intersecting boxes.
-* `find_best_matches(box_list_1, box_list_2, iou_threshold: float)->tuple[list[tuple[int,int]],list[int],list[int]]`: Returns best unique matches between two given lists of boxes. Matches are only returned if they intersect and meet the Intersection over Union threshold (`iou_threshold`) and no other match with any unmatched box in the oposing list is better. A tuple of matches, remaining_list_1, remaining_list_2 is returned.
+* `find_best_matches(box_list_1, box_list_2, iou_threshold: float)->tuple[list[tuple[int,int]],list[int],list[int]]`: Returns best unique matches between two given lists of boxes. Matches are only returned if they intersect and meet the Intersection over Union threshold (`iou_threshold`) and no other match with any unmatched box in the opposing list is better. A tuple of matches, remaining_list_1, remaining_list_2 is returned.
 * `efficient_coverage(box_list, cover_rect_width, cover_rect_height)->list[tuple[tuple[int, int],list[int]]]`: A heuristic algorithm to try to quickly generate a small number of fixed-sized tiles to cover all the boxes in the box list. If any of the boxes are too large to fit in the tile, an error is raised.
 * `find_non_max_suppressed(box_list, box_scores:list[float], iou_threshold:float,overlap_threshold:float)->list[bool]`: Identifies similar boxes in set with more overlap than the two thresholds specify, and suppresses the lower confidence one. Standard algorithm to deduplicate boxes in object detection frameworks.
 
@@ -79,7 +79,7 @@ print(intersecting_idxs) # [0, 1]
 
 ## Benchmark results
 
-Running the following commands on my laptop (subject to signifiant noise):
+Running the following commands on my laptop (subject to significant noise):
 
 ```
 python benchmark/run_benchmark.py --num-boxes 10000000 --region-size 100000 --max-box-size 100 --test-iterations 2
@@ -106,7 +106,7 @@ num boxes|num intersections| find_intersecting_boxes_t|find_non_max_suppressed_t
 
 ### Recursive Tile Sort (RTS) RTree
 
-The idea is to build an RTree, essentailly a recursive interval tree where the sort axis swaps with each recursion down. Each node in the tree is a bounding box around a set of subnodes. The subnodes may overlap with each-other, so you have to check each child when doing recursive searches, similar to a B-Tree. This implementation uses an interval tree to store the sub-nodes, allowing for large sets of children, allowing for much flatter trees.
+The idea is to build an RTree, essentially a recursive interval tree where the sort axis swaps with each recursion down. Each node in the tree is a bounding box around a set of subnodes. The subnodes may overlap with each-other, so you have to check each child when doing recursive searches, similar to a B-Tree. This implementation uses an interval tree to store the sub-nodes, allowing for large sets of children, allowing for much flatter trees.
 
 Building an efficient R-tree requires the use of recursive tile sort, hard to describe, but easier to visualize. Note that any method to build a valid R-tree will result in correct output, this method is only used to build an efficiently spatially partitioned R-tree.
 
@@ -117,7 +117,7 @@ Building an efficient R-tree requires the use of recursive tile sort, hard to de
 
 This library used to do a simple reduction of 2d box overlap problems to a 1d interval overlap problem across the *x* axis, followed by brute force search across the *y* axis.
 
-While asymtotically suboptimal, the resulting methods result in highly parallizable, cache-local, and predictable code flows, resulting in excelent performance on most datasets, and nearly optimal performance on small and sparse datasets.
+While asymptotically suboptimal, the resulting methods result in highly parallizable, cache-local, and predictable code flows, resulting in excellent performance on most datasets, and nearly optimal performance on small and sparse datasets.
 
 Since only the *x* dimension is optimized, the time efficiency of this library does depend on the boxes being spread broadly across the *x* axis. However, rest assured that the accuracy and memory efficiency of this library remains regardless of the size and positions of the boxes.
 
@@ -140,7 +140,7 @@ Consider the following intervals, sorted by their left coordinate (we can keep t
 
 Each interval has index *i* in the sorted list.
 
-Note that all the intervals to the right of interval *i* are placed immidiately after *i* in the sorted list----once you find one interval to the right of *i* that does not intersect with it, there will never be another one anywhere else in the sorted list that is to the right.
+Note that all the intervals to the right of interval *i* are placed immediately after *i* in the sorted list----once you find one interval to the right of *i* that does not intersect with it, there will never be another one anywhere else in the sorted list that is to the right.
 
 So you can use this fact to easily build a directed graph of intervals pointing to all intervals to the right of them (psedocode)
 
@@ -155,9 +155,9 @@ Once you have that directed graph of left-to-right in an adjacency list, you can
 
 As for theoretical performance, the complete run-time of this algorithm is dominated by the original sort plus the number of actual interval intersections: *n \* log(n) + m*.
 
-One noteable implementation detail is that since we are actually concerend with boxes, not intervals, the *y* dimension check is within the `intervals_to_the_right` proceedure, so that the adjacency graph does not need to actually be built in memory for boxes that do not overlap. This means that on realistic workflows, this proceedure is actually the vast majority of the computational work, as it is scanning and filtering many possible boxes which do overlap in the *x* dimension, but not overlap in the *y*  dimension.
+One notable implementation detail is that since we are actually concerned with boxes, not intervals, the *y* dimension check is within the `intervals_to_the_right` procedure, so that the adjacency graph does not need to actually be built in memory for boxes that do not overlap. This means that on realistic workflows, this procedure is actually the vast majority of the computational work, as it is scanning and filtering many possible boxes which do overlap in the *x* dimension, but not overlap in the *y*  dimension.
 
-Below is a visualization of this proceedure. The bolded box is the box currently searched. The yellow region is the brute force search space. The blue boxes are the boxes to the right that the search finds, the green boxes are the boxes found by inverting the graph (no search needed, it has already completed).
+Below is a visualization of this procedure. The bolded box is the box currently searched. The yellow region is the brute force search space. The blue boxes are the boxes to the right that the search finds, the green boxes are the boxes found by inverting the graph (no search needed, it has already completed).
 
 ![tile sort gif](docs/line_search.gif)
 
@@ -171,11 +171,11 @@ An interval tree is a well known algorithm for online comparison of one interval
 
 Specific implementation details:
 
-1. Since the tree is not added to, then unlike the implementation in CLRS, a ballanced interval tree can be built in *n* time via a simple bottom-up construction.
-2. The base of the tree is sorted by left cooridnate before the tree is constructed. This means that nearby intervals are placed close together, reducing search cost from *k\* log(n)* to *k + log(n)* assuming uniform interval length. However, the sorting step does increase one-time cost of building the tree from *n* to *n\*log(n)*.
+1. Since the tree is not added to, then unlike the implementation in CLRS, a balanced interval tree can be built in *n* time via a simple bottom-up construction.
+2. The base of the tree is sorted by left coordinate before the tree is constructed. This means that nearby intervals are placed close together, reducing search cost from *k\* log(n)* to *k + log(n)* assuming uniform interval length. However, the sorting step does increase one-time cost of building the tree from *n* to *n\*log(n)*.
 3. Instead of a binary tree, a b-tree of size 8 is constructed.
 
-Note that the implementation is no longer part of the master branch, as it was superceeded by the recursive tile sort implementation. See the [single_thread](https://github.com/benblack769/box-intersect-lib/blob/single_thread/box-intersect-lib/src/interval_tree.rs) branch for the implementation.
+Note that the implementation is no longer part of the master branch, as it was superseded by the recursive tile sort implementation. See the [single_thread](https://github.com/benblack769/box-intersect-lib/blob/single_thread/box-intersect-lib/src/interval_tree.rs) branch for the implementation.
 
 ### Efficient coverage heuristic
 
@@ -203,8 +203,8 @@ A lower bound of the 2 approximation is shown below:
 
 This particular case produces 6 tiles, where the optimal solution produces 4. However, in the infinite limit, extended downwards, this produces twice as many tiles as the best case. Suggesting that the 2-approximation is tight.
 
-While the upper bound is not a rigourous proof by any means, this left-to-right heuristic also performed better on synthetic benchmarks than other greedy algorithms that were tried, such as the "set-cover" inspired method of choosing the maximally covering single tile iterativly, or a choosing the maximally covering left-most tile iteratively.
+While the upper bound is not a rigorous proof by any means, this left-to-right heuristic also performed better on synthetic benchmarks than other greedy algorithms that were tried, such as the "set-cover" inspired method of choosing the maximally covering single tile iteratively, or a choosing the maximally covering left-most tile iteratively.
 
 As for speed, the implementation of this algorithm is one of the fastest of all the algorithms in the repo, due to it not using the R-Tree structure at all. Since both phases of the algorithm are left-to-right sweeps, the implementation instead does a single left-to-right sweep over boxes, and builds up multiple tiles at once. As the global sweep encounters a new left-most box, it either adds a box to an existing tile window, or if that is not possible, creates a new tile window. These windows are added from left-to-right by construction, and so only the first windows need to be checked if they need to be popped off the stack or not when the global sweep passes their left-most edge. All in-progress windows are checked by brute force when a new box is encountered. This yields a `O(num_boxes * num_windows)` algorithm in the worst case where all boxes are vertically stacked on top of each other with lots of spacing in between them in the Y axis, but if boxes spacings are equally distributed between X and Y fields (no matter their density), then it goes to `O(num_boxes * sqrt(num_boxes))` max runtime, as there will only be `sqrt(num_boxes)` number of windows open at any given point in time that need to be checked. This means that a simple optimization to reduce worst-case analysis could be swapping the X and Y if there is a lot of vertical stacking, which should reduce the worst case analysis to the square case of `O(num_boxes * sqrt(num_boxes))`.
 
-[More writeup on the intuition behind this algorithm here](https://benblack769.github.io/posts/blog/rect_cover/)
+[More writeup on the intuition behind this algorithm here](https://benblack769.github.io/posts/learnings/rect_cover/)
