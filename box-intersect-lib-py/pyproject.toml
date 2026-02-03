@@ -18,4 +18,3 @@ readme = "README.md"
 [project.urls]
 Homepage = "https://github.com/Techcyte/box-intersect-lib"
 Repository = "https://github.com/Techcyte/box-intersect-lib.git"
-

@@ -34,7 +34,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
+                python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13', '3.14']
         steps:
             - uses: actions/checkout@v4
             - name: Set up Python ${{ matrix.python-version }}
@@ -53,14 +53,15 @@ jobs:
             - name: Run integration test
               run: |
                   python scripts/integration_test.py
+
     test-linux-wheels:
       runs-on: ubuntu-latest
       steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.12
+      - name: Set up Python 3.14
         uses: actions/setup-python@v4 
         with:
-            python-version: 3.12
+            python-version: 3.14
       - name: Install python dependencies
         run: |
             pip install numpy
@@ -71,5 +72,5 @@ jobs:
       - name: Run integration test on native built wheel
         shell: bash
         run: |
-            pip install dist/*cp312*.whl
+            pip install dist/*cp314*.whl
             python scripts/integration_test.py
